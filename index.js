@@ -105,12 +105,24 @@ async function run() {
       res.send(result)
     })
 
-    app.get('/manager/products/:email', async (req, res) => {
-      const email = req.params.email;
-      const query = { managerEmail: email }
-      const result = await productCollection.find(query).toArray()
-      res.send(result)
+
+    app.get('/my-request', verifyFBToken, async (req, res) => {
+      const email = req.decoded_email;
+      const size = Number(req.query.size)
+      const page = Number(req.query.page)
+
+      const query = { requesterEmail: email }
+
+      const result = await reequestsCollection
+        .find(query)
+        .limit(size)
+        .skip(size * page)
+        .toArray()
+
+      const totalRequest = await reequestsCollection.countDocuments(query)
+      res.send({request: result, totalRequest})
     })
+
 
 
     await client.db("admin").command({ ping: 1 });
