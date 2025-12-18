@@ -1,3 +1,4 @@
+const { MongoClient, ServerApiVersion } = require('mongodb');
 const express = require('express')
 const cors = require('cors')
 require('dotenv').config()
@@ -7,9 +8,35 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 
+const admin = require("firebase-admin");
+const decoded = Buffer.from(process.env.FB_SERVICE_KEY, 'base64').toString('utf8')
+const serviceAccount = JSON.parse(decoded);
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+});
 
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const verifyFBToken = async (req, res, next) => {
+  const token = req.headers.authorization;
+
+  if (!token) {
+    return res.status(401).send({ message: 'unauthorize access' })
+  }
+  try {
+    const idToken = token.split(' ')[1]
+    const decoded = await admin.auth().verifyIdToken(idToken)
+    console.log('decoded info:', decoded);
+    req.decoded_email = decoded.email
+    next()
+  }
+  catch (error) {
+    return res.status(401).send({ message: 'unauthorize access' })
+  }
+}
+
+
+
 const uri = "mongodb+srv://practice-11:0iix5UWbGhAok7BM@cluster0.83ib2ra.mongodb.net/?appName=Cluster0";
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -28,21 +55,46 @@ async function run() {
 
     const database = client.db('practice-11DB')
     const userCollection = database.collection('user')
+    const reequestsCollection = database.collection('request')
 
     app.post('/user', async (req, res) => {
       const userInfo = req.body
-      userInfo.role = 'buyer'
       userInfo.createdAt = new Date()
+      userInfo.role = 'donor'
+      userInfo.status = 'active'
       const result = await userCollection.insertOne(userInfo)
       res.send(result)
     })
 
 
+    app.get('/users', verifyFBToken, async (req, res) => {
+      const result = await userCollection.find().toArray()
+      res.send(result)
+    })
+
+
     app.get('/user/role/:email', async (req, res) => {
-      const {email} = req.params
+      const { email } = req.params
       const query = { email: email }
       const result = await userCollection.findOne(query)
       console.log(result);
+      res.send(result)
+    })
+
+
+
+
+    app.post('/requests', verifyFBToken, async (req, res) => {
+      const data = req.body;
+      data.createdAt = new Date();
+      const result = await reequestsCollection.insertOne(data)
+      res.send(result)
+    })
+
+    app.get('/manager/products/:email', async (req, res) => {
+      const email = req.params.email;
+      const query = { managerEmail: email }
+      const result = await productCollection.find(query).toArray()
       res.send(result)
     })
 
