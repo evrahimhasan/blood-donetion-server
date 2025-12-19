@@ -164,26 +164,43 @@ async function run() {
     });
 
 
-     // view request 
-    app.get("/Dashboard/view-request/:id",async(req,res)=>{
-      const {id} = req.params;
-      const query ={_id : new ObjectId(id)}
+    // view request 
+    app.get("/Dashboard/view-request/:id", async (req, res) => {
+      const { id } = req.params;
+      const query = { _id: new ObjectId(id) }
       const result = await reequestsCollection.findOne(query)
       res.send(result)
     })
 
     // Done Request
-    app.patch("/done-request",verifyFBToken,async(req,res)=>{
-      const {id,status}=req.query;
-      const query ={_id :new ObjectId(id)}
-      const update={
-        $set:{
-          donationStatus:status
+    app.patch("/done-request", verifyFBToken, async (req, res) => {
+      const { id, status } = req.query;
+      const query = { _id: new ObjectId(id) }
+      const update = {
+        $set: {
+          donationStatus: status
         }
       }
-      const result=await reequestsCollection.updateOne(query,update)
+      const result = await reequestsCollection.updateOne(query, update)
       res.send(result)
     })
+
+
+    // Canceled Request
+    app.patch("/cancel-request", verifyFBToken, async (req, res) => {
+      const { id, status } = req.query;
+      console.log(id, status);
+      const query = { _id: new ObjectId(id) }
+
+      const update = {
+        $set: {
+          donationStatus: status
+        }
+      }
+      const result = await reequestsCollection.updateOne(query, update)
+      res.send(result)
+    })
+
 
 
 
