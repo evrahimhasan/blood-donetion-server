@@ -202,6 +202,14 @@ async function run() {
     })
 
 
+    // Donation Request
+    app.get("/donation-page", async (req, res) => {
+      const query = { donationStatus: "pending" }
+      const result = await reequestsCollection.find(query).toArray()
+      res.send(result)
+    })
+
+
 
 
     // payment
