@@ -155,6 +155,15 @@ async function run() {
     });
 
 
+    // delete request
+    app.delete("/Delete-request", verifyFBToken, async (req, res) => {
+      const id = req.query.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await reequestsCollection.deleteOne(query);
+      res.send(result);
+    });
+
+
 
     // payment
     app.post('/create-payment-checkout', async (req, res) => {
