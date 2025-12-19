@@ -3,8 +3,8 @@ const express = require('express')
 const cors = require('cors')
 require('dotenv').config()
 const port = process.env.PORT || 3000
-// const stripe = require('stripe')(process.env.STRIPE_SECRET);
-// const crypto = require('crypto')
+const stripe = require('stripe')(process.env.STRIPE_SECRET);
+const crypto = require('crypto')
 
 const app = express()
 app.use(cors())
@@ -99,7 +99,7 @@ async function run() {
     })
 
 
-
+    // Request
     app.post('/requests', verifyFBToken, async (req, res) => {
       const data = req.body;
       data.createdAt = new Date();
@@ -131,6 +131,36 @@ async function run() {
       res.send({ request: result, totalRequest });
     });
 
+
+
+    // payment
+    app.post('/create-payment-checkout', async (req, res) => {
+      const information = req.body
+      const amount = parseInt(information.donateAmount) * 100;
+
+      const session = await stripe.checkout.sessions.create({
+        line_items: [
+          {
+            price_data: {
+              currency: 'usd',
+              unit_amount: amount,
+              product_data: {
+                name: 'Please Donate'
+              }
+            },
+            quantity: 1,
+          },
+        ],
+        mode: 'payment',
+        metadata: {
+          donorName: information.donorName
+        },
+        customer_email: information.donorEmail,
+        success_url: `${process.env.SITE_DOMAIN}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${process.env.SITE_DOMAIN}/payment-cancelled`
+      })
+      res.send({ url: session.url })
+    })
 
 
     await client.db("admin").command({ ping: 1 });
