@@ -117,7 +117,7 @@ async function run() {
       let query = { requesterEmail: email };
 
       if (status) {
-        query.status = status;
+        query.donationStatus = status;
       }
 
       const result = await reequestsCollection
@@ -140,7 +140,7 @@ async function run() {
 
       let query = {};
       if (status) {
-        query.status = status;
+        query.donationStatus = status;
       }
 
       const result = await reequestsCollection
