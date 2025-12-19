@@ -3,6 +3,8 @@ const express = require('express')
 const cors = require('cors')
 require('dotenv').config()
 const port = process.env.PORT || 3000
+const stripe = require('stripe')(process.env.STRIPE_SECRET);
+const crypto = require('crypto')
 
 const app = express()
 app.use(cors())
@@ -108,20 +110,26 @@ async function run() {
 
     app.get('/my-request', verifyFBToken, async (req, res) => {
       const email = req.decoded_email;
-      const size = Number(req.query.size)
-      const page = Number(req.query.page)
+      const page = Number(req.query.page);
+      const size = Number(req.query.size);
+      const status = req.query.status;
 
-      const query = { requesterEmail: email }
+      let query = { requesterEmail: email };
+
+      if (status) {
+        query.status = status;
+      }
 
       const result = await reequestsCollection
         .find(query)
+        .skip(page * size)
         .limit(size)
-        .skip(size * page)
-        .toArray()
+        .toArray();
 
-      const totalRequest = await reequestsCollection.countDocuments(query)
-      res.send({request: result, totalRequest})
-    })
+      const totalRequest = await reequestsCollection.countDocuments(query);
+
+      res.send({ request: result, totalRequest });
+    });
 
 
 
