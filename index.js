@@ -172,6 +172,19 @@ async function run() {
       res.send(result)
     })
 
+    // Done Request
+    app.patch("/done-request",verifyFBToken,async(req,res)=>{
+      const {id,status}=req.query;
+      const query ={_id :new ObjectId(id)}
+      const update={
+        $set:{
+          donationStatus:status
+        }
+      }
+      const result=await reequestsCollection.updateOne(query,update)
+      res.send(result)
+    })
+
 
 
     // payment
