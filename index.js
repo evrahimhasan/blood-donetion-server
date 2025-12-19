@@ -1,4 +1,4 @@
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const express = require('express')
 const cors = require('cors')
 require('dotenv').config()
@@ -162,6 +162,15 @@ async function run() {
       const result = await reequestsCollection.deleteOne(query);
       res.send(result);
     });
+
+
+     // view request 
+    app.get("/Dashboard/view-request/:id",async(req,res)=>{
+      const {id} = req.params;
+      const query ={_id : new ObjectId(id)}
+      const result = await reequestsCollection.findOne(query)
+      res.send(result)
+    })
 
 
 
