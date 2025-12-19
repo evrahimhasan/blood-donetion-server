@@ -3,8 +3,8 @@ const express = require('express')
 const cors = require('cors')
 require('dotenv').config()
 const port = process.env.PORT || 3000
-const stripe = require('stripe')(process.env.STRIPE_SECRET);
-const crypto = require('crypto')
+// const stripe = require('stripe')(process.env.STRIPE_SECRET);
+// const crypto = require('crypto')
 
 const app = express()
 app.use(cors())
