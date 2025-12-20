@@ -71,7 +71,8 @@ async function run() {
 
     app.get('/users', verifyFBToken, async (req, res) => {
       const result = await userCollection.find().toArray()
-      res.send(result)
+      const totaluser = await userCollection.countDocuments()
+      res.send({ user: result, totaluser })
     })
 
 
@@ -133,7 +134,7 @@ async function run() {
 
 
     // All Request
-    app.get("/All-request", verifyFBToken, async (req, res) => {
+    app.get("/all-request", verifyFBToken, async (req, res) => {
       const size = Number(req.query.size);
       const page = Number(req.query.page);
       const status = req.query.status;
@@ -153,6 +154,15 @@ async function run() {
 
       res.send({ request: result, totalRequest });
     });
+
+
+
+    // Recent Request
+    app.get("/recent-request",verifyFBToken,async(req,res)=>{ 
+      const result = await reequestsCollection.find().sort({createdAt:-1}).limit(3).toArray()
+       res.send(result) 
+      })
+
 
 
     // delete request
