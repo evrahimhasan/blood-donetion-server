@@ -85,7 +85,7 @@ async function run() {
     })
 
 
-
+    // status change api
     app.patch('/update/user/status', verifyFBToken, async (req, res) => {
       const { email, status } = req.query
       const query = { email: email }
@@ -98,6 +98,22 @@ async function run() {
       const result = await userCollection.updateOne(query, updateStatus)
       res.send(result)
     })
+
+
+    // role change
+    app.patch('/update/role', verifyFBToken, async (req, res) => {
+      const { email, role } = req.query;
+
+      const query = { email };
+      const updateRole = {
+        $set: {
+          role: role
+        }
+      };
+
+      const result = await userCollection.updateOne(query, updateRole);
+      res.send(result);
+    });
 
 
     // Request
@@ -158,10 +174,10 @@ async function run() {
 
 
     // Recent Request
-    app.get("/recent-request",verifyFBToken,async(req,res)=>{ 
-      const result = await reequestsCollection.find().sort({createdAt:-1}).limit(3).toArray()
-       res.send(result) 
-      })
+    app.get("/recent-request", verifyFBToken, async (req, res) => {
+      const result = await reequestsCollection.find().sort({ createdAt: -1 }).limit(3).toArray()
+      res.send(result)
+    })
 
 
 
