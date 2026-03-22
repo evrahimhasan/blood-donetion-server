@@ -69,12 +69,21 @@ async function run() {
       res.send(result)
     })
 
-
+    // All User
     app.get('/users', verifyFBToken, async (req, res) => {
-      const result = await userCollection.find().toArray()
-      const totaluser = await userCollection.countDocuments()
-      res.send({ user: result, totaluser })
-    })
+      const size = Number(req.query.size)
+      const page = Number(req.query.page) 
+
+      const result = await userCollection
+        .find()
+        .limit(size)
+        .skip(size * page)
+        .toArray();
+
+      const totaluser = await userCollection.countDocuments();
+
+      res.send({ user: result, totaluser });
+    });
 
 
     app.get('/user/role/:email', async (req, res) => {
@@ -324,9 +333,9 @@ async function run() {
 
       const transactionId = session.payment_intent;
 
-      const isPaymentExist = await paymentsCollection.findOne({transactionId})
+      const isPaymentExist = await paymentsCollection.findOne({ transactionId })
 
-      if(isPaymentExist){
+      if (isPaymentExist) {
         return
       }
 
